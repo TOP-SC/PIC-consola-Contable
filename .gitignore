@@ -1,0 +1,37 @@
+# Secretos y entorno local
+.env
+**/.env
+!.env.example
+!**/.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Builds portables (muy pesados; se regeneran con build_portable.bat)
+app/build/
+app/dist/
+app/portable/ARBA_IBPER/
+
+# Datos operativos
+Logs/
+**/Logs/
+Documentos/
+**/Documentos/
+*.xlsx
+*.log
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# App .NET original (referencia local, no versionar binarios)
+Archivos de texto IBPER/

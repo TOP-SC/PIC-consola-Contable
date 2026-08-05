@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PIC · Plataforma Integral Contable</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css?v=2.0.2" />
+</head>
+<body>
+  <div class="splash" id="splash" aria-hidden="true">
+    <div class="splash-glow"></div>
+    <div class="splash-content">
+      <div class="splash-kicker">Bienvenido a</div>
+      <div class="splash-logo">PIC</div>
+      <div class="splash-name">Plataforma Integral Contable</div>
+      <div class="splash-line"></div>
+      <div class="top-watermark splash-wm" aria-hidden="true">
+        <span>Creado por Proyecto y Transformación</span>
+        <span>Operativa (TOP)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-mark">PIC</div>
+        <div>
+          <strong>Plataforma Integral</strong>
+          <span>Contable</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard">
+          <span class="nav-icon">⌂</span><span>Inicio</span>
+        </button>
+        <div class="nav-label">Módulos</div>
+        <button class="nav-item" data-view="ibper">
+          <span class="nav-icon">≡</span><span>IBPER unificado</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-status">
+        <span class="dot" id="statusDot"></span>
+        <span id="statusText">Verificando…</span>
+      </div>
+      <div class="sidebar-version">PIC · v1.0</div>
+    </aside>
+
+    <main class="workspace">
+      <section class="view active" id="view-dashboard">
+        <header class="page-header">
+          <div>
+            <div class="eyebrow">PLATAFORMA INTEGRAL CONTABLE</div>
+            <h1>Buen día</h1>
+            <p>Todo el trabajo contable, organizado en un solo lugar.</p>
+          </div>
+          <div class="date-chip" id="todayLabel"></div>
+        </header>
+
+        <div class="dashboard-grid">
+          <article class="module-card available" data-open="ibper">
+            <div class="module-top">
+              <span class="module-icon">IB</span>
+              <span class="module-state">Disponible</span>
+            </div>
+            <h2>IBPER unificado</h2>
+            <p>Consulta las percepciones de Tango y genera el archivo TXT para presentar en ARBA.</p>
+            <div class="module-action">Abrir módulo <span>→</span></div>
+          </article>
+
+          <article class="module-card coming">
+            <div class="module-top">
+              <span class="module-icon muted">+</span>
+              <span class="module-state neutral">Próximamente</span>
+            </div>
+            <h2>Nuevos módulos</h2>
+            <p>PIC está preparado para incorporar los próximos procesos del área contable.</p>
+          </article>
+        </div>
+
+        <section class="summary-card">
+          <div>
+            <span class="summary-label">Última consulta IBPER</span>
+            <strong id="dashLastQuery">Todavía no se realizaron consultas</strong>
+          </div>
+          <div class="summary-stat">
+            <strong id="dashRows">0</strong><span>registros</span>
+          </div>
+          <div class="summary-stat">
+            <strong id="dashBranches">0</strong><span>sucursales</span>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="view-ibper">
+        <header class="page-header compact">
+          <div>
+            <button class="back-link" data-view-target="dashboard">← Volver al inicio</button>
+            <div class="eyebrow">ARBA · PERCEPCIONES IIBB</div>
+            <h1>IBPER unificado</h1>
+            <p>Consultá Tango y prepará el TXT definitivo para ARBA.</p>
+          </div>
+          <div class="connection-badge">
+            <span class="dot" id="moduleStatusDot"></span>
+            <span id="moduleStatusText">Verificando…</span>
+          </div>
+        </header>
+
+        <section class="panel query-panel">
+          <div class="controls">
+            <label>Desde<input type="date" id="desde" /></label>
+            <label>Hasta<input type="date" id="hasta" /></label>
+            <div class="actions">
+              <button class="btn-primary" id="btnBuscar">Buscar</button>
+              <button class="btn-save" id="btnGenerar" disabled>Guardar TXT</button>
+            </div>
+          </div>
+          <div class="meta">
+            <div>Filas <strong id="contador">0</strong></div>
+            <div>Sucursales <strong id="branchesOk">—</strong></div>
+            <div>Con errores <strong id="branchesErr">—</strong></div>
+          </div>
+          <div class="errors" id="errors"></div>
+        </section>
+
+        <section class="panel table-panel">
+          <div class="table-wrap">
+            <table>
+              <colgroup>
+                <col class="col-local"><col class="col-tipo"><col class="col-comp">
+                <col class="col-fecha"><col class="col-razon"><col class="col-cuit">
+                <col class="col-gravado"><col class="col-importe"><col class="col-alic">
+                <col class="col-desc">
+              </colgroup>
+              <thead><tr>
+                <th>Local</th><th>Tipo</th><th>Comprobante</th><th>Fecha</th>
+                <th>Razón social</th><th>CUIT</th><th class="num">Gravado</th>
+                <th class="num">Importe</th><th>Alíc.</th><th>Descripción</th>
+              </tr></thead>
+              <tbody id="tbody">
+                <tr><td colspan="10" class="empty">Elegí un rango de fechas y pulsá Buscar.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <footer class="top-watermark app-wm" aria-label="Marca TOP">
+        <span>Creado por Proyecto y Transformación</span>
+        <span>Operativa (TOP)</span>
+      </footer>
+    </main>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay" aria-live="polite">
+    <div class="loader-orbit"><span></span><span></span><span></span></div>
+    <strong>Consultando Tango</strong>
+    <p>Estamos unificando la información de las sucursales…</p>
+    <small>Este proceso puede demorar unos instantes.</small>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="/app.js?v=2.0.2"></script>
+</body>
+</html>
