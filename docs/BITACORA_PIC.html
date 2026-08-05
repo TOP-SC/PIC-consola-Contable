@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PIC · IBPER unificado — Bitácora y balance Etapa 1</title>
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --paper: #ffffff;
+      --ink: #1e2a3a;
+      --muted: #5c6b7d;
+      --accent: #2c5282;
+      --accent2: #2b6cb0;
+      --ok: #276749;
+      --ok-bg: #f0fff4;
+      --warn: #b7791f;
+      --gold: #b7791f;
+      --gold-bg: #fffbeb;
+      --border: #dde4ee;
+      --shadow: 0 4px 20px rgba(30, 42, 58, 0.08);
+      --radius: 16px;
+      --teal: #0f766e;
+      --teal-soft: #ecfdf5;
+      --blue: #2563eb;
+      --orange: #c2410c;
+      --header-grad: linear-gradient(135deg, #0b3b3a 0%, #1a5c57 45%, #1e3a5f 100%);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: linear-gradient(160deg, #eef2f8 0%, #f0faf8 50%, #eef4f8 100%);
+      color: var(--ink);
+      line-height: 1.55;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; }
+    header {
+      background: var(--header-grad);
+      color: #fff;
+      border-radius: 18px;
+      padding: 2rem 2.25rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+    }
+    header .eyebrow {
+      font-size: .72rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: rgba(255,255,255,.75); margin-bottom: .5rem;
+    }
+    header h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .35rem; }
+    header p { color: rgba(255,255,255,.92); font-size: .95rem; max-width: 820px; }
+    header .meta { margin-top: 1rem; font-size: .82rem; color: rgba(255,255,255,.85); }
+    header code {
+      background: rgba(255,255,255,.18); color: #fff; padding: .1rem .4rem;
+      border-radius: 4px; font-size: .78rem;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; }
+    .tag {
+      display: inline-block; padding: .2rem .7rem; border-radius: 999px;
+      font-size: .72rem; font-weight: 700;
+    }
+    .tag.done { background: #c6f6d5; color: #22543d; }
+    .tag.pro { background: rgba(255,255,255,.12); color: #a7f3d0; border: 1px solid rgba(167,243,208,.45); }
+    .tag.prio { background: rgba(255,255,255,.1); color: #e2e8f0; border: 1px solid rgba(226,232,240,.35); }
+
+    .pack-nav, .tabs {
+      display: flex; flex-wrap: wrap; gap: .45rem; align-items: center;
+      margin-bottom: 1rem; padding: .65rem .85rem;
+      background: var(--paper); border: 1px solid var(--border);
+      border-radius: 12px; box-shadow: var(--shadow); font-size: .82rem;
+    }
+    .pack-nav span { color: var(--muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: .35rem .5rem; }
+    .tab-btn {
+      font: inherit; font-weight: 600; padding: .4rem .85rem; cursor: pointer;
+      border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--accent);
+    }
+    .tab-btn:hover { background: #ebf4ff; border-color: #bee3f8; }
+    .tab-btn.active { background: var(--accent); color: #fff; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .kpi-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1rem; margin-bottom: 1.25rem;
+    }
+    .kpi {
+      background: var(--paper); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1rem 1.15rem; box-shadow: var(--shadow);
+    }
+    .kpi .label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+    .kpi .value { font-size: 1.55rem; font-weight: 700; margin: .15rem 0; line-height: 1.15; }
+    .kpi .sub { font-size: .78rem; color: var(--muted); }
+    .kpi.inv { border-top: 3px solid var(--blue); }
+    .kpi.inv .value { color: var(--blue); }
+    .kpi.ok { border-top: 3px solid var(--ok); }
+    .kpi.ok .value { color: var(--ok); }
+    .kpi.warn { border-top: 3px solid var(--orange); }
+    .kpi.warn .value { color: var(--orange); }
+    .kpi.teal { border-top: 3px solid var(--teal); }
+    .kpi.teal .value { color: var(--teal); }
+
+    section, .card-block {
+      background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.4rem 1.6rem; margin-bottom: 1.25rem; box-shadow: var(--shadow);
+    }
+    h2 {
+      font-size: 1.1rem; color: var(--accent); margin-bottom: .45rem;
+      padding-bottom: .45rem; border-bottom: 2px solid #e8eef6;
+    }
+    h3 { font-size: .95rem; margin: 1.1rem 0 .45rem; color: var(--ink); }
+    p, li { font-size: .88rem; }
+    p { margin-bottom: .75rem; }
+    ul, ol { margin: 0 0 1rem 1.2rem; }
+    li { margin-bottom: .3rem; }
+    .muted { color: var(--muted); font-size: .84rem; }
+    .lead { color: var(--muted); font-size: .92rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+    th, td { padding: .55rem .7rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { background: #f0f4fa; color: var(--accent); font-size: .76rem; font-weight: 700; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tr.highlight td { background: var(--ok-bg); font-weight: 600; }
+    tr:hover td { background: #fafbfd; }
+
+    .callout {
+      border-radius: 10px; padding: 1rem 1.15rem; margin: 1rem 0; font-size: .88rem;
+      background: #ebf8ff; border: 1px solid #b8d4f0; border-left: 4px solid var(--accent2);
+    }
+    .callout.ok { background: var(--ok-bg); border-color: #9ae6b4; border-left-color: var(--ok); }
+    .callout.gold { background: var(--gold-bg); border-color: #f0d080; border-left-color: var(--gold); }
+    .callout.warn { background: #fff7ed; border-color: #fdba74; border-left-color: var(--orange); }
+    .callout strong { color: var(--accent); }
+    .callout.ok strong { color: var(--ok); }
+
+    .badge {
+      display: inline-block; padding: .15rem .55rem; border-radius: 999px;
+      font-size: .72rem; font-weight: 700;
+    }
+    .badge-ok { background: #c6f6d5; color: #22543d; }
+    .badge-info { background: #bee3f8; color: #2a4365; }
+    .badge-warn { background: #fefcbf; color: #744210; }
+    .badge-pend { background: #edf2f7; color: var(--muted); }
+
+    .grid-2 {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem; align-items: start;
+    }
+    .mini {
+      border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; background: #fafbfd;
+    }
+    .mini h4 { font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .35rem; }
+    .mini .big { font-size: 1.35rem; font-weight: 700; color: var(--accent); }
+    .mini .big.ok { color: var(--ok); }
+    .mini .big.blue { color: var(--blue); }
+    .mini .big.orange { color: var(--orange); }
+
+    .bar-row { margin: .65rem 0; }
+    .bar-label { display: flex; justify-content: space-between; font-size: .8rem; margin-bottom: .25rem; }
+    .bar-track { height: 12px; background: #e8eef6; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; }
+    .bar-fill.top { background: #14b8a6; }
+    .bar-fill.free { background: #6366f1; }
+    .bar-fill.ag { background: #7c3aed; }
+    .bar-fill.mkt { background: #f59e0b; width: 100%; }
+
+    .kv { display: grid; grid-template-columns: 180px 1fr; gap: .35rem .85rem; font-size: .88rem; }
+    .kv dt { color: var(--muted); font-weight: 600; }
+    .kv dd { margin: 0; }
+
+    .timeline { list-style: none; margin: 0; padding: 0; }
+    .timeline li {
+      position: relative; padding: 0 0 1.1rem 1.5rem;
+      border-left: 2px solid #c5d5e8;
+    }
+    .timeline li:last-child { border-left-color: transparent; padding-bottom: 0; }
+    .timeline li::before {
+      content: ""; position: absolute; left: -6px; top: .35rem;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--teal); border: 2px solid #fff; box-shadow: 0 0 0 2px #99f6e4;
+    }
+    .timeline .when { font-size: .72rem; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .04em; }
+    .timeline .what { font-weight: 600; font-size: .9rem; margin: .1rem 0; }
+    .timeline .how { font-size: .84rem; color: var(--muted); }
+
+    .ficha {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0; border-radius: 16px; padding: 1.35rem 1.5rem; margin-bottom: 1.25rem;
+    }
+    .ficha h2 { color: #67e8f9; border-bottom-color: rgba(103,232,249,.25); }
+    .ficha table th { background: rgba(255,255,255,.06); color: #67e8f9; border-bottom-color: rgba(255,255,255,.1); }
+    .ficha table td { border-bottom-color: rgba(255,255,255,.08); color: #e2e8f0; }
+    .ficha .note { color: #94a3b8; font-size: .8rem; margin-top: .75rem; }
+
+    .team-block {
+      margin: 1rem 0; border-radius: var(--radius); overflow: hidden;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, #f0f6fc 0%, #fff 55%, #ecfdf5 100%);
+      box-shadow: var(--shadow);
+    }
+    .team-block-head {
+      display: flex; align-items: center; gap: 1rem; padding: 1.1rem 1.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .team-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 2.85rem; height: 2.85rem; border-radius: 10px;
+      background: linear-gradient(145deg, #0b3b3a, #1a5c57); color: #fff;
+      font-size: .8rem; font-weight: 800; letter-spacing: .06em;
+    }
+    .team-block-head h2 { margin: 0; border: none; padding: 0; font-size: 1rem; }
+    .team-block-head p { margin: .15rem 0 0; font-size: .8rem; color: var(--muted); }
+    .team-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: .85rem; padding: 1rem 1.25rem 1.25rem;
+    }
+    .team-member {
+      display: flex; align-items: center; gap: .85rem; padding: .9rem 1rem;
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    }
+    .team-member strong { display: block; font-size: .88rem; }
+    .team-role { font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); }
+
+    footer {
+      text-align: center; font-size: .78rem; color: var(--muted);
+      padding: 1.5rem 0 .5rem; margin-top: 1rem;
+    }
+    .doc-watermark {
+      position: fixed; bottom: .75rem; left: 50%; transform: translateX(-50%);
+      font-size: .72rem; color: rgba(30,42,58,.38); pointer-events: none;
+      white-space: nowrap; z-index: 50;
+    }
+    .adjust {
+      display: inline-block; font-size: .68rem; font-weight: 700; color: var(--warn);
+      background: #fef3c7; padding: .05rem .4rem; border-radius: 4px; margin-left: .25rem;
+    }
+    @media (max-width: 720px) {
+      body { padding: .75rem; }
+      .kv { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.35rem; }
+    }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .tabs { display: none; }
+      .panel { display: block !important; page-break-inside: avoid; }
+      .doc-watermark { position: static; transform: none; margin: 1rem 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Contable › Presentaciones impositivas · Ticket TOP-8FF105CB</div>
+      <h1>PIC · IBPER unificado</h1>
+      <p>
+        Bitácora de edificación y balance de <strong>Etapa 1</strong> de la
+        <strong>Plataforma Integral Contable</strong>: consulta unificada de percepciones
+        IIBB Bs.As. desde Tango y generación del TXT listo para presentar en ARBA.
+      </p>
+      <div class="meta">
+        Inicio: <strong>04/08/2026 17:31</strong> ·
+        Cierre Etapa 1: <strong>05/08/2026</strong> ·
+        Build <code>pic-ibper-2.0.2</code> ·
+        Repo <code>TOP-SC/PIC-consola-Contable</code>
+      </div>
+      <div class="tags">
+        <span class="tag done">Fin Etapa 1</span>
+        <span class="tag pro">Pro TOP</span>
+        <span class="tag prio">Alta</span>
+        <span class="tag prio">Integración / enterprise</span>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Secciones de la bitácora">
+      <span>Secciones</span>
+      <button class="tab-btn active" data-tab="resumen">Resumen</button>
+      <button class="tab-btn" data-tab="costos">Costos</button>
+      <button class="tab-btn" data-tab="comparativa">Comparativa</button>
+      <button class="tab-btn" data-tab="contexto">Contexto</button>
+      <button class="tab-btn" data-tab="bitacora">Bitácora de edificación</button>
+      <button class="tab-btn" data-tab="ficha">Ficha tablero</button>
+    </nav>
+
+    <!-- ========== RESUMEN ========== -->
+    <div class="panel active" id="tab-resumen">
+      <section>
+        <h2>Frase clave</h2>
+        <p class="lead" style="font-size:1rem;color:var(--ink)">
+          Un solo click sobre Tango reemplaza el circuito manual
+          <em>TXT por sucursal → Excel → verificación → TXT ARBA</em>,
+          reduciendo error humano en liquidaciones impositivas donde el costo del fallo
+          son <strong>multas y reprocesos</strong>.
+        </p>
+      </section>
+
+      <div class="kpi-row">
+        <div class="kpi inv">
+          <div class="label">Invertimos</div>
+          <div class="value">US$ 1.000</div>
+          <div class="sub">20 h × USD 50/h · Etapa 1</div>
+        </div>
+        <div class="kpi ok">
+          <div class="label">Liberamos / año</div>
+          <div class="value">US$ 4.800</div>
+          <div class="sub">96 h/año × USD 50 · porción IBPER</div>
+        </div>
+        <div class="kpi warn">
+          <div class="label">Evitamos (riesgo)</div>
+          <div class="value">Multas</div>
+          <div class="sub">Fiscales + reprocesos · sin cuantificar aún</div>
+        </div>
+        <div class="kpi teal">
+          <div class="label">ROI neto / año 1</div>
+          <div class="value">US$ 3.800</div>
+          <div class="sub">Ahorro − inversión · sin multas evitadas</div>
+        </div>
+      </div>
+
+      <section>
+        <h2>Antes vs Después</h2>
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Antes — proceso manual</h4>
+            <ul>
+              <li>Extraer TXT por sucursal desde el entorno operativo</li>
+              <li>Pegar / unificar en Excel</li>
+              <li>Verificar, controlar y corregir a mano</li>
+              <li>Reconstruir el TXT en formato ARBA</li>
+              <li>Riesgo de datos erróneos y bases descentralizadas (27 sucursales)</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Después — PIC IBPER</h4>
+            <ul>
+              <li>Elegir rango de fechas en la consola</li>
+              <li>Buscar: consulta unificada a Tango (todas las sucursales)</li>
+              <li>Revisar grilla única en pantalla</li>
+              <li>Guardar como TXT ARBA (formato fijo correcto)</li>
+              <li>Acceso desde TR/local sin entrar al RDS · portable</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout ok">
+          <strong>Ahorro operativo estimado Etapa 1:</strong>
+          ~8 h/mes dedicadas al circuito IBPER
+          → <strong>96 h/año</strong> · <strong>US$ 4.800/año</strong>.
+          <span class="adjust">a calibrar con Contable</span>
+          El ticket original proyectaba ~60 h/mes para la unificación completa
+          (varios reportes impositivos); IBPER es el primer módulo entregado.
+        </div>
+      </section>
+
+      <section>
+        <h2>Tiempo de recuperación TOP</h2>
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Payback financiero</h4>
+            <div class="big ok">2,5 meses</div>
+            <p class="muted" style="margin:0">Meses de ahorro operativo para recuperar la inversión TOP.</p>
+          </div>
+          <div class="mini">
+            <h4>Payback en horas</h4>
+            <div class="big ok">&lt; 1 mes</div>
+            <p class="muted" style="margin:0">20 h invertidas vs ~8 h liberadas/mes → recupero en el primer ciclo de liquidación.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Estado Etapa 1</h2>
+        <table>
+          <thead>
+            <tr><th>Entregable</th><th>Estado</th><th>Nota</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Consulta SQL a Tango (vista + SP sucursales)</td>
+              <td><span class="badge badge-ok">Hecho</span></td>
+              <td>NOLOCK / READ UNCOMMITTED · pymssql portable</td>
+            </tr>
+            <tr>
+              <td>Unificación en grilla única</td>
+              <td><span class="badge badge-ok">Hecho</span></td>
+              <td>Todas las sucursales, sin Excel intermedio</td>
+            </tr>
+            <tr>
+              <td>Generación TXT formato ARBA IBPER</td>
+              <td><span class="badge badge-ok">Hecho</span></td>
+              <td>Ancho fijo · Guardar como</td>
+            </tr>
+            <tr>
+              <td>Shell PIC (splash, dashboard, sidebar)</td>
+              <td><span class="badge badge-ok">Hecho</span></td>
+              <td>Lista para próximos módulos contables</td>
+            </tr>
+            <tr>
+              <td>Portable + despliegue RDS + acceso desde TR</td>
+              <td><span class="badge badge-ok">Hecho</span></td>
+              <td>PyInstaller · scripts Actualizar/Iniciar remoto</td>
+            </tr>
+            <tr>
+              <td>Repo GitHub TOP-SC</td>
+              <td><span class="badge badge-ok">Hecho</span></td>
+              <td>https://github.com/TOP-SC/PIC-consola-Contable</td>
+            </tr>
+            <tr>
+              <td>Calibración hs/mes con Contable</td>
+              <td><span class="badge badge-warn">Pendiente</span></td>
+              <td>Cronometrar 1 liquidación real con Marcela</td>
+            </tr>
+            <tr>
+              <td>Próximos reportes impositivos (Etapa 2+)</td>
+              <td><span class="badge badge-info">Fuera de alcance 1</span></td>
+              <td>Ticket TOP-8FF105CB · unificación completa</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- ========== COSTOS ========== -->
+    <div class="panel" id="tab-costos">
+      <section>
+        <h2>Inversión TOP — Etapa 1</h2>
+        <div class="kpi-row">
+          <div class="kpi inv">
+            <div class="label">Total USD</div>
+            <div class="value">US$ 1.000</div>
+            <div class="sub">Etapa 1 IBPER</div>
+          </div>
+          <div class="kpi teal">
+            <div class="label">Horas invertidas</div>
+            <div class="value">20 h</div>
+            <div class="sub">04–05/08/2026</div>
+          </div>
+          <div class="kpi ok">
+            <div class="label">Tarifa inversión</div>
+            <div class="value">USD 50/h</div>
+            <div class="sub">Estándar TOP</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Fases de inversión</h2>
+        <table>
+          <thead>
+            <tr><th>Fase</th><th>Qué incluye</th><th class="num">Horas</th><th class="num">USD</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Discovery</strong></td>
+              <td>
+                Relevamiento del pedido Contable, formato TXT ARBA IBPER (layout fijo),
+                esquema de consulta a Tango (vista de impuestos + SP de sucursales),
+                criterios de unificación y riesgos fiscales del ticket.
+                <br><span class="muted">Discovery relativo: materia prima de primera mano del área solicitante.</span>
+              </td>
+              <td class="num">4</td>
+              <td class="num">200</td>
+            </tr>
+            <tr>
+              <td><strong>Desarrollo</strong></td>
+              <td>
+                Backend FastAPI, motor IBPER, SQL multi-sucursal, frontend PIC,
+                portable PyInstaller, scripts RDS/TR, marca TOP, anti-caché, repo.
+              </td>
+              <td class="num">16</td>
+              <td class="num">800</td>
+            </tr>
+            <tr class="highlight">
+              <td><strong>Total Etapa 1</strong></td>
+              <td>Desde primer archivo (04/08 17:31) hasta cierre productivo (05/08)</td>
+              <td class="num"><strong>20</strong></td>
+              <td class="num"><strong>1.000</strong></td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="muted">
+          Criterio de horas: ventana calendario 04/08 → 05/08 sobre el primer artefacto del proyecto
+          (<code>requirements.txt</code> / <code>config.py</code>, convertida a horas de foco efectivo
+          (no wall-clock continuo). Solo Etapa 1 — IBPER unificado.
+        </p>
+      </section>
+
+      <section>
+        <h2>Discovery y conocimiento</h2>
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Discovery TOP</h4>
+            <div class="big blue">4 h</div>
+            <p class="muted" style="margin:0">US$ 200 · relevamiento liviano</p>
+          </div>
+          <div class="mini">
+            <h4>Conocimiento total</h4>
+            <div class="big">20 h</div>
+            <p class="muted" style="margin:0">Discovery + desarrollo retenido en código y equipo</p>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Conocimiento retenido:</strong>
+          layout fijo IBPER ARBA · reglas de signo/NC · consulta multi-sucursal Tango con lecturas no bloqueantes ·
+          empaquetado portable sin ODBC obligatorio · patrón de acceso remoto RDS sin tareas programadas ·
+          shell PIC reutilizable para próximos módulos contables.
+        </div>
+      </section>
+
+      <section>
+        <h2>Referencia del ticket (análisis IA original)</h2>
+        <p class="muted">
+          El análisis de valor del ticket estimó <strong>120 h</strong> y <strong>USD 3.600</strong>
+          (a USD 30/h) para la unificación completa de reportes impositivos, con ahorro de
+          ~60 h/mes. Esta Etapa 1 entrega el primer corte (IBPER) a una fracción de ese esfuerzo,
+          validando el camino técnico antes de escalar.
+        </p>
+        <table>
+          <thead>
+            <tr><th>Concepto</th><th>Ticket (visión completa)</th><th>Entregado Etapa 1</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Horas desarrollo</td><td>120 h</td><td>20 h</td></tr>
+            <tr><td>Inversión</td><td>USD 3.600 (a USD 30/h)</td><td>USD 1.000 (a USD 50/h TOP)</td></tr>
+            <tr><td>Ahorro proyectado</td><td>~60 h/mes (todos los reportes)</td><td>~8 h/mes (solo IBPER) <span class="adjust">estim.</span></td></tr>
+            <tr><td>Payback estimado</td><td>&lt; 2,5 meses</td><td>2,5 meses</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- ========== COMPARATIVA ========== -->
+    <div class="panel" id="tab-comparativa">
+      <section>
+        <h2>Costos por alternativa</h2>
+        <p class="intro muted">Mismo alcance funcional de Etapa 1 (consulta Tango + TXT ARBA IBPER + consola usable en red).</p>
+        <table>
+          <thead>
+            <tr><th>Alternativa</th><th class="num">Costo</th><th>Base de cálculo</th></tr>
+          </thead>
+          <tbody>
+            <tr class="highlight">
+              <td><strong>Inversión TOP</strong></td>
+              <td class="num"><strong>US$ 1.000</strong></td>
+              <td>20 h × USD 50</td>
+            </tr>
+            <tr>
+              <td>Freelancer senior AR</td>
+              <td class="num">US$ 3.000</td>
+              <td>40 h × USD 75 (redescubre dominio + pruebas)</td>
+            </tr>
+            <tr>
+              <td>Empresa / agencia dev</td>
+              <td class="num">US$ 6.500</td>
+              <td>Desarrollo 40 h + discovery 20 h + impl. + fee</td>
+            </tr>
+            <tr>
+              <td>App / stack de mercado (3 años)</td>
+              <td class="num">US$ 12.400</td>
+              <td>RPA/ETL + BI + adaptación fiscal local (visión ticket)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top:1.25rem">
+          <div class="bar-row">
+            <div class="bar-label"><span>TOP</span><span>US$ 1.000</span></div>
+            <div class="bar-track"><div class="bar-fill top" style="width:8%"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label"><span>Freelancer</span><span>US$ 3.000</span></div>
+            <div class="bar-track"><div class="bar-fill free" style="width:24%"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label"><span>Empresa</span><span>US$ 6.500</span></div>
+            <div class="bar-track"><div class="bar-fill ag" style="width:52%"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label"><span>Stack mercado (3 años)</span><span>US$ 12.400</span></div>
+            <div class="bar-track"><div class="bar-fill mkt"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Tiempo de recuperación por alternativa</h2>
+        <table>
+          <thead>
+            <tr><th>Alternativa</th><th class="num">Payback (sobre ahorro IBPER)</th></tr>
+          </thead>
+          <tbody>
+            <tr class="highlight"><td>TOP (USD)</td><td class="num"><strong>2,5 meses</strong></td></tr>
+            <tr><td>TOP (horas)</td><td class="num">&lt; 1 mes</td></tr>
+            <tr><td>Freelancer</td><td class="num">7,5 meses</td></tr>
+            <tr><td>Empresa</td><td class="num">16,3 meses</td></tr>
+            <tr><td>Stack mercado (3 años)</td><td class="num">31 meses</td></tr>
+          </tbody>
+        </table>
+        <p class="muted">Ahorro base usado: US$ 4.800/año (96 h × USD 50). Sin incluir valor de multas evitadas.</p>
+      </section>
+
+      <section>
+        <h2>Desglose externo</h2>
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Freelancer — US$ 3.000</h4>
+            <ul>
+              <li>Desarrollo: US$ 2.250</li>
+              <li>Discovery: US$ 750</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Empresa — US$ 6.500</h4>
+            <ul>
+              <li>Desarrollo: US$ 2.500</li>
+              <li>Discovery: US$ 1.500</li>
+              <li>Implementación: US$ 1.000</li>
+              <li>Fee / consultoría: US$ 1.200</li>
+              <li>Mantenimiento año 1: US$ 300</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mini" style="margin-top:1rem">
+          <h4>Alternativa comercial (visión ticket) — US$ 12.400 / 3 años</h4>
+          <p class="muted">Pipeline RPA/ETL + warehouse + Power BI, tal como sugería el análisis de valor original.</p>
+          <ul>
+            <li>Licencias / plataforma: US$ 5.400</li>
+            <li>Implementación: US$ 3.600</li>
+            <li>Mantenimiento 3 años: US$ 1.800</li>
+            <li>Brecha adaptación fiscal local (ARBA IBPER): US$ 1.600</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2>Ahorro vs alternativas</h2>
+        <div class="kpi-row">
+          <div class="kpi ok">
+            <div class="label">vs Freelancer</div>
+            <div class="value">+US$ 2.000</div>
+            <div class="sub">Misma Etapa 1</div>
+          </div>
+          <div class="kpi ok">
+            <div class="label">vs Empresa</div>
+            <div class="value">+US$ 5.500</div>
+            <div class="sub">Misma Etapa 1</div>
+          </div>
+          <div class="kpi warn">
+            <div class="label">vs Stack mercado</div>
+            <div class="value">+US$ 11.400</div>
+            <div class="sub">Horizonte 3 años</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ========== CONTEXTO ========== -->
+    <div class="panel" id="tab-contexto">
+      <section>
+        <h2>Ficha del caso</h2>
+        <dl class="kv">
+          <dt>Caso</dt><dd>PIC · IBPER unificado</dd>
+          <dt>Usuario / solicitante</dt><dd>Marcela Diaz · Contable</dd>
+          <dt>Área / origen</dt><dd>Contable · SommierCenter</dd>
+          <dt>Ticket</dt><dd>TOP-8FF105CB · Aprobado con condiciones</dd>
+          <dt>Prioridad</dt><dd>Alta · impacto fiscal (multas / reprocesos)</dd>
+          <dt>Herramienta</dt><dd>Python FastAPI + HTML/CSS/JS + pymssql + SQL Server (Tango) + PyInstaller portable</dd>
+          <dt>En Argentina</dt><dd>
+            Presentaciones IIBB Bs.As. (ARBA). Flujo típico del mercado local: exportes TXT del ERP,
+            consolidación Excel, armado manual del layout fijo. Alternativas: macros, RPA genérico,
+            BI sin motor fiscal ARBA específico.
+          </dd>
+          <dt>Inicio</dt><dd>04/08/2026</dd>
+          <dt>Finalización Etapa 1</dt><dd>05/08/2026</dd>
+          <dt>Horas invertidas</dt><dd>20 h</dd>
+          <dt>URL operativa</dt><dd>http://10.100.3.26:8787 (RDS) · acceso desde TR/local</dd>
+          <dt>Repo</dt><dd>https://github.com/TOP-SC/PIC-consola-Contable</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h2>Discovery (pedido real)</h2>
+        <p><strong>Problema declarado:</strong> falta de unificación de las bases del sistema operativo.</p>
+        <p><strong>Objetivo:</strong> obtención de reportes mensuales y unificación para presentaciones impositivas.</p>
+        <p><strong>Proceso actual:</strong> depende de recopilar datos en TXT → pasar a Excel → verificar y controlar → corregir TXT.</p>
+        <p><strong>Dolor:</strong> datos erróneos y bases descentralizadas · liquidaciones quincenales y mensuales · riesgo de multas y reprocesos.</p>
+        <div class="callout gold">
+          <strong>Test 3 preguntas (ticket):</strong>
+          libera &gt;5 h/semana = <strong>SI</strong> ·
+          datos 100% limpios/estructurados = <strong>NO</strong> (de ahí la necesidad del motor) ·
+          impacto económico directo = <strong>SI</strong> (multas fiscales).
+          Decisión: <strong>APROBADO CON CONDICIONES</strong>.
+        </div>
+      </section>
+
+      <section>
+        <h2>Observaciones técnicas</h2>
+        <ul>
+          <li>Consola web PIC con splash, dashboard y sidebar modular (lista para más módulos contables).</li>
+          <li>Backend FastAPI: <code>/api/search</code>, <code>/api/generate-download</code>, <code>/api/status</code>, <code>/api/health</code>.</li>
+          <li>Lecturas SQL con <code>NOLOCK</code> + <code>READ UNCOMMITTED</code> para no trabar Tango.</li>
+          <li>Backend SQL portable vía <code>pymssql</code> (sin depender de ODBC en el RDS).</li>
+          <li>TXT IBPER de ancho fijo con “Guardar como” (el usuario elige destino).</li>
+          <li>Ejecutable portable + scripts <code>ActualizarRDS</code> / <code>IniciarDesdeTR</code> (WMI) sin tareas programadas ni cambios de configuración del RDS.</li>
+          <li>Anti-caché HTTP + versionado de assets (<code>?v=2.0.2</code>).</li>
+          <li>Marca de agua TOP en splash y pie de app.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Alcance Etapa 1 vs visión completa</h2>
+        <table>
+          <thead>
+            <tr><th>Alcance</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>IBPER unificado (percepciones IIBB Bs.As. → TXT ARBA)</td><td><span class="badge badge-ok">Etapa 1 entregada</span></td></tr>
+            <tr><td>Shell PIC multi-módulo</td><td><span class="badge badge-ok">Base lista</span></td></tr>
+            <tr><td>Otros reportes impositivos / unificación total de bases</td><td><span class="badge badge-info">Etapa 2+</span></td></tr>
+            <tr><td>Dashboard BI / alertas de integridad</td><td><span class="badge badge-info">Etapa 2+</span></td></tr>
+            <tr><td>Cronometraje formal hs/mes con Contable</td><td><span class="badge badge-warn">Calibración</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- ========== BITÁCORA ========== -->
+    <div class="panel" id="tab-bitacora">
+      <section>
+        <h2>Bitácora de edificación — Etapa 1</h2>
+        <p class="lead">
+          Relato de construcción <strong>desde cero</strong>, a partir del pedido Contable y del formato
+          exigido por ARBA. Sin depender de un producto previo: relevamiento, diseño, desarrollo,
+          empaquetado y puesta en red.
+        </p>
+
+        <ul class="timeline">
+          <li>
+            <div class="when">04/08/2026 · Discovery</div>
+            <div class="what">Pedido Contable y definición del problema</div>
+            <div class="how">
+              Ticket TOP-8FF105CB (Marcela Diaz): unificar bases descentralizadas para presentaciones
+              impositivas. Se acota Etapa 1 a <strong>IBPER / percepciones IIBB Bs.As.</strong>,
+              el circuito más crítico y repetible (TXT → Excel → TXT).
+            </div>
+          </li>
+          <li>
+            <div class="when">04/08/2026 · Discovery técnico</div>
+            <div class="what">Formato TXT ARBA y fuente Tango</div>
+            <div class="how">
+              Se releva el layout de ancho fijo IBPER (CUIT, fechas, importes, alícuotas, signos de NC).
+              Se identifica la consulta a la vista de impuestos y el SP de sucursales multinivel
+              como fuente oficial en SQL Server / Tango. Primeros archivos del repo a las <strong>17:31</strong>.
+            </div>
+          </li>
+          <li>
+            <div class="when">04/08/2026 · Core backend</div>
+            <div class="what">FastAPI + motor IBPER + SQL</div>
+            <div class="how">
+              Configuración, schemas, servicio SQL multi-sucursal, generación de bytes TXT,
+              endpoints de búsqueda y descarga. Stack Python 3.12 + FastAPI + Pydantic.
+            </div>
+          </li>
+          <li>
+            <div class="when">04/08 → 05/08 · Frontend v1</div>
+            <div class="what">Consola web operativa</div>
+            <div class="how">
+              Pantalla de consulta por fechas, grilla unificada, estado de conexión, generación TXT.
+              Validación de conectividad real a SQL Server desde el entorno con acceso a Tango.
+            </div>
+          </li>
+          <li>
+            <div class="when">05/08/2026 · Portable</div>
+            <div class="what">PyInstaller + pymssql</div>
+            <div class="how">
+              Ejecutable autónomo para RDS (sin instalar Python ni ODBC). Lecturas con NOLOCK.
+              Decisión de arquitectura: app web local/portable, no RemoteApp ni cambios de config del servidor.
+            </div>
+          </li>
+          <li>
+            <div class="when">05/08/2026 · Acceso remoto</div>
+            <div class="what">RDS + iniciador desde TR</div>
+            <div class="how">
+              Escucha en <code>0.0.0.0:8787</code>, scripts WMI para iniciar/actualizar sin tareas programadas
+              (los RDS se reinician solos). Los usuarios abren la app por HTTP desde TR/local.
+            </div>
+          </li>
+          <li>
+            <div class="when">05/08/2026 · Shell PIC</div>
+            <div class="what">Identidad de plataforma</div>
+            <div class="how">
+              Renombre a <strong>PIC — Plataforma Integral Contable</strong>. Splash con fade,
+              dashboard, sidebar modular, indicador de carga, “Guardar como”, tabla sin scroll horizontal,
+              estado Conectado/Desconectado, marca de agua TOP.
+            </div>
+          </li>
+          <li>
+            <div class="when">05/08/2026 · Cierre Etapa 1</div>
+            <div class="what">Repo + versión 2.0.2 en producción</div>
+            <div class="how">
+              Publicación en GitHub <code>TOP-SC/PIC-consola-Contable</code>, anti-caché de assets,
+              scripts de actualización remota validados. App viva en
+              <code>http://10.100.3.26:8787</code>.
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Decisiones de diseño</h2>
+        <table>
+          <thead>
+            <tr><th>Decisión</th><th>Por qué</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Web local portable (no WinForms / no RemoteApp)</td>
+              <td>Acceso desde TR/local sin RDP al RDS · sin pedir permisos a otros sectores</td>
+            </tr>
+            <tr>
+              <td>pymssql + fallback pyodbc</td>
+              <td>El RDS no puede depender de drivers ODBC preinstalados</td>
+            </tr>
+            <tr>
+              <td>NOLOCK / READ UNCOMMITTED</td>
+              <td>Consultas de reporte sin bloquear operación de Tango</td>
+            </tr>
+            <tr>
+              <td>Eliminar Excel del camino crítico</td>
+              <td>El Excel era el eslabón de error; la grilla + TXT directo es el camino correcto</td>
+            </tr>
+            <tr>
+              <td>Shell PIC multi-módulo desde el día 1</td>
+              <td>El ticket pide unificación amplia; IBPER es el primer módulo, no el último</td>
+            </tr>
+            <tr>
+              <td>Sin tareas programadas en RDS</td>
+              <td>Restricción operativa: los RDS se reinician y no se pueden agendar tareas</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Inventario de artefactos entregados</h2>
+        <table>
+          <thead>
+            <tr><th>Artefacto</th><th>Ubicación</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Backend FastAPI</td><td><code>app/backend/</code></td></tr>
+            <tr><td>Frontend PIC</td><td><code>app/frontend/</code></td></tr>
+            <tr><td>Entrada portable</td><td><code>app/run_server.py</code> + <code>ARBA_IBPER.spec</code></td></tr>
+            <tr><td>Actualización RDS</td><td><code>ActualizarRDS.ps1</code> / <code>.bat</code></td></tr>
+            <tr><td>Inicio remoto desde TR</td><td><code>IniciarDesdeTR.ps1</code> / <code>.bat</code></td></tr>
+            <tr><td>Config ejemplo</td><td><code>.env.example</code></td></tr>
+            <tr><td>Repositorio</td><td>github.com/TOP-SC/PIC-consola-Contable</td></tr>
+            <tr><td>Esta bitácora (local)</td><td><code>docs/BITACORA_PIC.html</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- ========== FICHA TABLERO ========== -->
+    <div class="panel" id="tab-ficha">
+      <div class="ficha">
+        <h2>Ficha lista para el tablero de casos</h2>
+        <p style="color:#94a3b8;font-size:.85rem;margin-bottom:1rem">
+          Valores para cargar en el detalle del caso (Resumen / Costos / Comparativa / Contexto).
+          Los campos de ahorro están marcados para calibrar con Contable en la primera liquidación real.
+        </p>
+        <table>
+          <thead>
+            <tr><th>Campo tablero</th><th>Valor Etapa 1</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>CASO</td><td>PIC · IBPER unificado</td></tr>
+            <tr><td>USUARIO</td><td>Marcela Diaz</td></tr>
+            <tr><td>ESTADO</td><td>Fin Etapa 1</td></tr>
+            <tr><td>HS INV.</td><td>20</td></tr>
+            <tr><td>INVERSIÓN</td><td>US$ 1.000</td></tr>
+            <tr><td>HS AHORRO/AÑO</td><td>96 <span class="adjust">estim.</span></td></tr>
+            <tr><td>AHORRO USD/AÑO</td><td>US$ 4.800 <span class="adjust">estim.</span></td></tr>
+            <tr><td>PAYBACK</td><td>2,5 meses</td></tr>
+            <tr><td>ROI</td><td>US$ 3.800</td></tr>
+            <tr><td>Tarifa</td><td>USD 50/h</td></tr>
+            <tr><td>Discovery</td><td>4 h · US$ 200</td></tr>
+            <tr><td>Desarrollo</td><td>16 h · US$ 800</td></tr>
+            <tr><td>Tags</td><td>Pro TOP · Alta · Integración / enterprise</td></tr>
+            <tr><td>Inicio / Fin</td><td>04/08/2026 → 05/08/2026</td></tr>
+            <tr><td>Herramienta</td><td>FastAPI + JS + pymssql + SQL Server + PyInstaller</td></tr>
+          </tbody>
+        </table>
+        <p class="note">
+          No incluye valor monetario de multas fiscales evitadas (impacto declarado en el ticket, aún sin cuantificar).
+          Cuando Contable cronometre una liquidación IBPER real, actualizar HS AHORRO/AÑO y recalcular payback/ROI.
+        </p>
+      </div>
+
+      <section>
+        <h2>Supuestos abiertos (para el cierre formal)</h2>
+        <ol>
+          <li>Confirmar con Marcela cuántas horas/hombre lleva hoy <em>solo</em> el circuito IBPER por mes.</li>
+          <li>Definir si el valor hora liberada se mantiene en USD 50 (tarifa TOP) o USD 30 (análisis del ticket).</li>
+          <li>Registrar, si aparece, el costo histórico de multas/reprocesos atribuibles a este flujo.</li>
+          <li>Acordar alcance Etapa 2 (siguientes reportes del ticket de unificación).</li>
+        </ol>
+      </section>
+    </div>
+
+    <section class="team-block" aria-label="Equipo TOP">
+      <div class="team-block-head">
+        <span class="team-badge">TOP</span>
+        <div>
+          <h2>Equipo del proyecto</h2>
+          <p>Proyecto y Transformación Operativa · PIC Contable</p>
+        </div>
+      </div>
+      <div class="team-grid">
+        <div class="team-member">
+          <div>
+            <strong>Juan Manuel Billiot</strong>
+            <span class="team-role">Desarrollo</span>
+          </div>
+        </div>
+        <div class="team-member">
+          <div>
+            <strong>Marcela Diaz</strong>
+            <span class="team-role">Usuario · Contable</span>
+          </div>
+        </div>
+        <div class="team-member">
+          <div>
+            <strong>Área Contable</strong>
+            <span class="team-role">Solicitante · materia prima</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      PIC · IBPER unificado · Bitácora Etapa 1 · Documento interno TOP · No viaja al servidor RDS ·
+      <a href="https://github.com/TOP-SC/PIC-consola-Contable" style="color:var(--accent2)">GitHub</a>
+    </footer>
+  </div>
+
+  <div class="doc-watermark" aria-hidden="true">
+    Creado por Proyecto y Transformación Operativa (TOP)
+  </div>
+
+  <script>
+    const buttons = document.querySelectorAll(".tab-btn");
+    const panels = document.querySelectorAll(".panel");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => b.classList.remove("active"));
+        panels.forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+      });
+    });
+  </script>
+</body>
+</html>
