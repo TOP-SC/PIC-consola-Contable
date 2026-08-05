@@ -74,7 +74,7 @@ def main() -> None:
     if not no_browser:
         threading.Thread(target=_open_browser, daemon=True).start()
 
-    print(f"ARBA IBPER Contable")
+    print("PIC - Plataforma Integral Contable")
     print(f"Escuchando: {host}:{port}")
     print(f"URL local: http://127.0.0.1:{port}")
     if public_url:
